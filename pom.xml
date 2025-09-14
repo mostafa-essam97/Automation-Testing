@@ -40,6 +40,21 @@
             <version>2.11.0</version>
         </dependency>
 
+        <!-- Reporting: ExtentReports -->
+        <dependency>
+            <groupId>com.aventstack</groupId>
+            <artifactId>extentreports</artifactId>
+            <version>5.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>1.6.7</version>
+        </dependency>
+
+
+
     </dependencies>
 
 </project>

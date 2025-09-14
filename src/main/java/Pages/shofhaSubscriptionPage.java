@@ -26,6 +26,9 @@ public class shofhaSubscriptionPage extends pageBase{
     @FindBy (id = "nextbtn")
     WebElement nextBtn;
 
+    @FindBy (css = "div.PopUp")
+    WebElement activeNumberPopUp;
+
     //Define Functions
     public void selectCountryByCode(String countryCode) {
         try {
@@ -53,11 +56,28 @@ public class shofhaSubscriptionPage extends pageBase{
     public void accessNewLPPage(){
         try {
             wait.until(ExpectedConditions.elementToBeClickable(nextBtn)).click();
-            System.out.println("Navigated to the Lp page successfully. ");
+            //checkNumberIsActive();
             Thread.sleep(3000);
+            System.out.println("✅ Current page URL after click next: " + driver.getCurrentUrl());
         } catch (Exception e) {
             System.out.println("Can't click the next button the system remains in the subscription page. " + e.getMessage() );
             Assert.fail("Failed to navigate to the OTP page. " +e.getMessage());
+        }
+    }
+
+    public void checkNumberIsActive(){
+        try {
+            wait.until(ExpectedConditions.visibilityOf(activeNumberPopUp));
+            String popupText = activeNumberPopUp.getText().trim();
+            if (popupText.contains("هذا الرقم مستخدم بالفعل")){
+                System.out.println("Already Subscribed, Click the button below to login.\n" + popupText);
+                Assert.fail("The inserted number is an active Number.");
+            }
+            else {
+                System.out.println("Navigated to the Lp page successfully. ");
+            }
+        } catch (Exception e) {
+            System.out.println("Something went wrong. " + e.getMessage());
         }
     }
 }

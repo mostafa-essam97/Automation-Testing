@@ -1,7 +1,10 @@
 package Pages;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
@@ -27,6 +30,29 @@ public class pageBase {
             case 2: return number + "nd";
             case 3: return number + "rd";
             default: return number + "th";
+        }
+    }
+
+    public boolean isElementDisplayed(WebElement element) {
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            shortWait.until(ExpectedConditions.visibilityOf(element));
+            return element.isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void scrollToElement(WebElement element) {
+        try {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            // التمرير إلى العنصر
+            js.executeScript("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element);
+            // انتظار بسيط للتأكد من تحميل العنصر
+            Thread.sleep(1000);
+            System.out.println("Scrolled to the "+ element.getText() +" successfully.");
+        } catch (InterruptedException e) {
+            System.out.println("Scrolling interrupted: " + e.getMessage());
         }
     }
 

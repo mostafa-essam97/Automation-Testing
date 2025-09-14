@@ -19,7 +19,7 @@ public class shofhaLP extends pageBase {
     @FindBy(id = "send_btn")
     WebElement nextToOTPBtn;
 
-    @FindBy (xpath = "//h1[contains(text(),'اختر الباقة المناسبة لك')]")
+    @FindBy(xpath = "//h1[contains(text(),'اختر الباقة المناسبة لك واستمتع الآن بالمشاهدة!')]")
     WebElement packagesTitle;
 
     //Define Functions
@@ -30,6 +30,7 @@ public class shofhaLP extends pageBase {
             Assert.assertEquals(packagesTitle.getText(),expectedPackageTitle);
             System.out.println("You are in the packages page, Please select one of the subscription packages..");
             wait.until(ExpectedConditions.elementToBeClickable(nextToOTPBtn)).click();
+            Thread.sleep(3000);
             System.out.println("The page title is: "+ packagesTitle.getText());
         } catch (Exception e) {
             System.out.println("Can't access the new LP page. " + e.getMessage());

@@ -1,5 +1,6 @@
 package Pages;
 
+import Utilities.testDataHolder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -15,6 +16,8 @@ import java.util.List;
 
 public class shofhaPackages extends pageBase {
     public String subscriptionTimestamp = "";
+//    public String packageType = "";
+//    public String packagePrice = "";
 
     public shofhaPackages(WebDriver driver) {
         super(driver);
@@ -25,37 +28,60 @@ public class shofhaPackages extends pageBase {
     @FindBy(css = "div.PKG .col-md-4")
     List<WebElement> packages;
 
-    //Define Functions
-    public String getSubscriptionTimestamp(){
-        return subscriptionTimestamp;
-    }
+    @FindBy(id = "errortext1")
+    WebElement packagesErrorMsg;
 
+    //Define Functions
     public void selectPackage(int index) {
         try {
+            // تأكد إن الباقات كلها ظهرت
             wait.until(ExpectedConditions.visibilityOfAllElements(packages));
 
-            if (index < 0 || index > packages.size()) {
-                System.out.println("Invalid index, The available packages are: " + "' " + packages.size() + " '");
-                Assert.fail("❌ Invalid index: ' " + index + " '. Available packages: " + "' " + packages.size() + " '");
+            if (packages.isEmpty()) {
+                System.out.println("❌ No packages appeared on the page!");
+                Assert.fail("❌ No packages available to select.");
+                return;
             }
-            else{
-                System.out.println("You are going to subscribe with the " + getOrdinal(index + 1) + " package.");
+
+            if (index < 0 || index >= packages.size()) {
+                System.out.println("❌ Invalid index. Available packages: " + packages.size());
+                Assert.fail("❌ Invalid index: '" + index + "'. Available packages: '" + packages.size() + "'.");
+            } else {
+                System.out.println("👉 You are going to subscribe with the " + getOrdinal(index + 1) + " package.");
                 WebElement selectedPackage = packages.get(index);
-                String packageType = selectedPackage.findElement(By.tagName("span")).getText().trim(); // To get the package type [Daily, Weekly, Monthly, ... etc]
-                String packagePrice = selectedPackage.findElement(By.className("CustomPrice")).getText().trim(); // To get the selected package's price
-                WebElement subNowBtn = selectedPackage.findElement(By.tagName("button"));
-                wait.until(ExpectedConditions.visibilityOf(subNowBtn));
-                Thread.sleep(2000);
-                subNowBtn.click();
+
+                // جبت نوع الباقة (Daily, Weekly, Monthly ...)
+                String packageType = selectedPackage.findElement(By.tagName("span")).getText().trim();
+                // جبت سعر الباقة
+                String packagePrice = selectedPackage.findElement(By.className("CustomPrice")).getText().trim();
+
+                // سجلت وقت الاشتراك
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 subscriptionTimestamp = LocalDateTime.now().format(formatter);
+                testDataHolder.subscriptionTimeStampData = subscriptionTimestamp;
+                testDataHolder.packageTypeData = packageType;
+                testDataHolder.packagePriceData = packagePrice;
 
-                System.out.println("You have chosen the " + packageType + " with price " + packagePrice + ".\n" +
+                // زرار Subscribe
+                WebElement subNowBtn = selectedPackage.findElement(By.tagName("button"));
+                wait.until(ExpectedConditions.elementToBeClickable(subNowBtn));
+                subNowBtn.click();
+                Thread.sleep(1000);
+
+                // ✅ هنا استخدمنا الفاكشن من pageBase
+                if (isElementDisplayed(packagesErrorMsg)) {
+                    System.out.println("❌ Error message appeared after selecting package: " + packagesErrorMsg.getText());
+                    Assert.fail("❌ Subscription failed. Error message: " + packagesErrorMsg.getText());
+                    return;
+                }
+
+                System.out.println("✅ You have chosen the " + packageType + " with price " + packagePrice + ".\n" +
                         "Please insert a valid OTP to enjoy with SHOFHA.\n" +
                         "⏱️ Subscription time recorded: " + subscriptionTimestamp);
             }
         } catch (Exception e) {
-            System.out.println("Failed to select package." + e.getMessage());
+            System.out.println("❌ Failed to select package. " + e.getMessage());
+            Assert.fail("❌ Exception while selecting package: " + e.getMessage());
         }
     }
 }

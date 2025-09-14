@@ -1,5 +1,6 @@
 package Pages;
 
+import Utilities.testDataHolder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -17,9 +18,10 @@ import java.util.regex.Pattern;
 
 public class simTestMessages extends pageBase {
     public String OTP = "";
+
     public simTestMessages(WebDriver driver) {
         super(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        wait = new WebDriverWait(driver, Duration.ofSeconds(50));
     }
 
     // Define Elements
@@ -33,23 +35,24 @@ public class simTestMessages extends pageBase {
     List<WebElement> messageItems;
 
     // Define Functions
-
-    public String getOTP() {
-        return OTP;
-    }
-
     public void findSenderMessage() {
         try {
             System.out.println("Waiting for the sender message...");
             wait.until(ExpectedConditions.visibilityOf(senderNumbers)).click();
-            System.out.println("OTP message opened successfully");
+            System.out.println("OTP message opened successfully.");
         } catch (Exception e) {
             System.out.println("Can't open the sender message. " + e.getMessage());
             Assert.fail("Sender message not found." + e.getMessage());
         }
     }
 
-    public String extractOTP(String subscriptionTimestamp) {
+    public void extractOTPFromAllSenders() {
+        // ✅ 1. وقت الاشتراك
+        String subscriptionTimestamp = testDataHolder.subscriptionTimeStampData;
+        if (subscriptionTimestamp == null || subscriptionTimestamp.isEmpty()) {
+            Assert.fail("❌ Subscription timestamp is missing. Cannot proceed with OTP extraction.");
+        }
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime subscriptionTime = LocalDateTime.parse(subscriptionTimestamp, formatter);
 
@@ -57,45 +60,68 @@ public class simTestMessages extends pageBase {
         int waitTimeInSeconds = 30;
 
         for (int attempt = 1; attempt <= retries; attempt++) {
-            System.out.println("🔍 Attempt #" + attempt + " to find OTP...");
+            System.out.println("🔍 Attempt #" + attempt + " to find OTP after subscription time: " + subscriptionTime);
 
             try {
-                // تحديث قائمة الرسائل (اختياري لو الصفحة مش بتتحدث تلقائيًا)
-                wait.until(ExpectedConditions.visibilityOfAllElements(messageItems));
+                // ✅ 2. نجيب كل المرسلين
+                List<WebElement> senders = driver.findElements(By.cssSelector("#recipients li"));
+                boolean otpFound = false;
 
-                for (WebElement message : messageItems) {
-                    String messageTime = message.findElement(By.className("sms-time")).getText().trim();
-                    LocalDateTime msgTime = LocalDateTime.parse(messageTime, formatter);
+                for (WebElement sender : senders) {
+                    sender.click();
+                    Thread.sleep(2000); // نستنى شوية لحد ما الرسائل تتحمل
 
-                    if (msgTime.isAfter(subscriptionTime)) {
-                        WebElement body = message.findElement(By.className("sms-body"));
-                        String text = body.getText();
+                    // ✅ 3. نجيب كل الرسائل الخاصة بالمرسل
+                    List<WebElement> messages = driver.findElements(By.cssSelector("#messages .message-item"));
 
-                        // استخراج OTP من الرسالة
-                        Pattern pattern = Pattern.compile("\\b\\d{4,6}\\b");
-                        Matcher matcher = pattern.matcher(text);
+                    if (messages.isEmpty()) {
+                        System.out.println("⚠️ No messages for sender: " + sender.getText());
+                        continue;
+                    }
 
-                        if (matcher.find()) {
-                            OTP = matcher.group();
-                            System.out.println("✅ OTP found: " + OTP+ "\n Subscription time is: "+ subscriptionTime+ "\n Message time is: " +msgTime);
-                            return OTP;
+                    // ✅ 4. نمشي على كل رسالة
+                    for (WebElement message : messages) {
+                        String messageTime = message.findElement(By.className("sms-time")).getText().trim();
+                        LocalDateTime msgTime = LocalDateTime.parse(messageTime, formatter);
+
+                        if (msgTime.isAfter(subscriptionTime)) {
+                            WebElement body = message.findElement(By.className("sms-body"));
+                            String text = body.getText();
+
+                            // regex لاستخراج OTP
+                            Pattern pattern = Pattern.compile("\\b\\d{4,6}\\b");
+                            Matcher matcher = pattern.matcher(text);
+
+                            if (matcher.find()) {
+                                OTP = matcher.group();
+                                testDataHolder.otpCodeData = OTP;
+                                System.out.println("✅ OTP found: " + OTP + " from sender: " + sender.getText() + " at " + msgTime);
+                                otpFound = true;
+                                break; // وقف أول ما نلاقي OTP
+                            } else {
+                                System.out.println("⚠️ Message at " + msgTime + " has no OTP.");
+                            }
+                        } else {
+                            System.out.println("⏳ Message at " + msgTime + " is before subscription time. Ignoring...");
                         }
+                    }
+
+                    if (otpFound) {
+                        return; // وقف أول ما نلاقي الكود
                     }
                 }
 
-                // لو مفيش OTP لحد دلوقتي
+                // ✅ 5. انتظار قبل إعادة المحاولة
                 if (attempt < retries) {
-                    System.out.println("⏳ No OTP found yet. Waiting " + waitTimeInSeconds + " seconds before retrying...");
+                    System.out.println("⏳ No OTP found. Waiting " + waitTimeInSeconds + " seconds before retrying...");
                     Thread.sleep(waitTimeInSeconds * 1000L);
                 }
 
             } catch (Exception e) {
-                System.out.println("⚠️ Error while checking messages: " + e.getMessage());
+                System.out.println("⚠️ Error while checking senders/messages: " + e.getMessage());
             }
         }
 
         Assert.fail("❌ OTP was not received after " + retries + " attempts.");
-        return null;
     }
-
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<suite name="Shofha Regression Suite" verbose="1" parallel="false">
+
+    <!-- Parameters -->
+    <parameter name="browser" value="chrome"/>
+
+    <!-- Listeners (بتشتغل على السويت كله) -->
+<!--    <listeners>-->
+<!--        <listener class-name="TestUtilities.TestListener"/>-->
+<!--    </listeners>-->
+
+    <listeners>
+        <listener class-name="TestUtilities.HtmlReportListener"/>
+    </listeners>
+
+
+    <!-- Regression Test Suite -->
+    <test name="Regression_Test_Suite" preserve-order="true">
+
+        <classes>
+            <class name="TestCases.TC_01_SIMTESTLogin"/>
+            <class name="TestCases.TC_02_SIMTestReservation"/>
+            <class name="TestCases.TC_03_OpenShofhaAndSubscribe"/>
+            <class name="TestCases.TC_04_SimTestGetOTPCode"></class>
+            <class name="TestCases.TC_05_VerifyPortalOTP"></class>
+            <class name="TestCases.TC_06_CancelUserSubscription"/>
+        </classes>
+
+    </test>
+</suite>

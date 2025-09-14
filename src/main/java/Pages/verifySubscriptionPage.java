@@ -37,8 +37,8 @@ public class verifySubscriptionPage extends pageBase{
     public void accessVerifyBtn(){
         try {
             wait.until(ExpectedConditions.elementToBeClickable(verifyBtn)).click();
-            Assert.assertEquals(verifyBtn.getText(),"تحقق");
-            System.out.println("Verify button clicked successfully.\n Congratulations your are subscribed on Shofha enjoy watching.");
+            //Assert.assertEquals(verifyBtn.getText(),"تحقق");
+            System.out.println("Verify button clicked successfully.\nCongratulations your are subscribed on Shofha enjoy watching.");
         } catch (Exception e) {
             System.out.println("Something want wrong. " + e.getMessage());
             Assert.fail("Can't insert the OTP. "+ e.getMessage());

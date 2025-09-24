@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public class simTestReserveNumbersPage extends pageBase{
     public simTestReserveNumbersPage(WebDriver driver) {
         super(driver);
@@ -69,5 +70,8 @@ public class simTestReserveNumbersPage extends pageBase{
         } catch (Exception e) {
             Assert.fail("Failed to click number at index " + getOrdinal(index + 1) + ": " + e.getMessage());
         }
+    }
+    public int getNumbersCount(){
+        return modemNumberList.size();
     }
 }

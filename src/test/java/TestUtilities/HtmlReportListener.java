@@ -44,7 +44,7 @@ public class HtmlReportListener implements ITestListener {
         model.setTestCaseName(result.getMethod().getMethodName());
         model.setClassName(result.getTestClass().getName());
         model.setStatus(status);
-        model.setDuration((result.getEndMillis() - result.getStartMillis()) + " ms");
+        model.setDuration((result.getEndMillis() - result.getStartMillis()) / 1000 + " s");
 
         // Business Data من testDataHolder
         model.setUsername(testDataHolder.simtestUsernameData);

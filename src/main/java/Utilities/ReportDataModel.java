@@ -16,6 +16,7 @@ public class ReportDataModel {
     private String packagePrice;
     private String subscriptionTimestamp;
     private String otpCode;
+    private String comment;
 
     // Getters & Setters
     public String getTestCaseName() { return testCaseName; }
@@ -53,4 +54,8 @@ public class ReportDataModel {
 
     public String getOtpCode() { return otpCode; }
     public void setOtpCode(String otpCode) { this.otpCode = otpCode; }
+
+    public String getComment() { return comment; }
+    public void setComment(String comment) { this.comment = comment; }
+
 }

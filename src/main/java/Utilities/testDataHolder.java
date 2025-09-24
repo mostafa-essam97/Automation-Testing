@@ -1,5 +1,7 @@
 package Utilities;
 
+import java.util.List;
+
 public class testDataHolder {
 
     //Define Attributes
@@ -7,6 +9,8 @@ public class testDataHolder {
     // ⬇️ New login info attributes
     public static String simtestUsernameData;
     public static String simtestPasswordData;
+
+    public static List<String> allReservedNumbers;
 
     // ⬇️ New reservation number info attributes
     public static String reservedNumberTextData;

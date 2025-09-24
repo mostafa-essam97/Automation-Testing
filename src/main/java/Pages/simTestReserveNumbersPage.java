@@ -21,13 +21,11 @@ public class simTestReserveNumbersPage extends pageBase{
     }
 
     // Define Elements
-
     @FindBy(css = "ul.modem-list-main li")
     List<WebElement> modemNumberList;
 
     //Define Functions
     public void chooseNumberByIndex(int index) {
-
         try {
             // Check index boundaries
             if (index < 0 || index >= modemNumberList.size()) {

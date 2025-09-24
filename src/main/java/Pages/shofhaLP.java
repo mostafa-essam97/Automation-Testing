@@ -6,34 +6,42 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-
 import java.time.Duration;
 
 public class shofhaLP extends pageBase {
     public shofhaLP(WebDriver driver) {
         super(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait = new WebDriverWait(driver, Duration.ofSeconds(15)); // خليها أطول شوية
     }
 
-    //Define Element
+    // Define Elements
     @FindBy(id = "send_btn")
     WebElement nextToOTPBtn;
 
-    @FindBy(xpath = "//h1[contains(text(),'اختر الباقة المناسبة لك واستمتع الآن بالمشاهدة!')]")
+    // خلي النص العربي أكثر مرونة باستخدام normalize-space
+    @FindBy(xpath = "//h1[contains(normalize-space(.),'اختر الباقة المناسبة لك')]")
     WebElement packagesTitle;
 
-    //Define Functions
+    // Define Functions
     public void navigateToPackegesPage() {
         String expectedPackageTitle = "اختر الباقة المناسبة لك واستمتع الآن بالمشاهدة!";
         try {
+            // استنى لحد ما العنوان يبان
             wait.until(ExpectedConditions.visibilityOf(packagesTitle));
-            Assert.assertEquals(packagesTitle.getText(),expectedPackageTitle);
-            System.out.println("You are in the packages page, Please select one of the subscription packages..");
+
+            // قارن النص بعد normalize-space للتأكد من المطابقة
+            String actualTitle = packagesTitle.getText().trim();
+            Assert.assertEquals(actualTitle, expectedPackageTitle,
+                    "Page title doesn't match. Expected: " + expectedPackageTitle + " but found: " + actualTitle);
+
+            System.out.println("✅ You are in the packages page, Please select one of the subscription packages..");
+
+            // استنى زرار الـ OTP button يبقى clickable
             wait.until(ExpectedConditions.elementToBeClickable(nextToOTPBtn)).click();
-            Thread.sleep(3000);
-            System.out.println("The page title is: "+ packagesTitle.getText());
+
+            System.out.println("The page title is: " + actualTitle);
         } catch (Exception e) {
-            System.out.println("Can't access the new LP page. " + e.getMessage());
+            System.out.println("❌ Can't access the new LP page. " + e.getMessage());
             Assert.fail("Can't find the right page. " + e.getMessage());
         }
     }

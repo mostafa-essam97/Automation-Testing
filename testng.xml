@@ -23,8 +23,8 @@
             <class name="TestCases.TC_01_SIMTESTLogin"/>
             <class name="TestCases.TC_02_SIMTestReservation"/>
             <class name="TestCases.TC_03_OpenShofhaAndSubscribe"/>
-            <class name="TestCases.TC_04_SimTestGetOTPCode"></class>
-            <class name="TestCases.TC_05_VerifyPortalOTP"></class>
+            <class name="TestCases.TC_04_SimTestGetOTPCode"/>
+            <class name="TestCases.TC_05_VerifyPortalOTP"/>
             <class name="TestCases.TC_06_CancelUserSubscription"/>
         </classes>
 

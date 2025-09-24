@@ -60,7 +60,7 @@ public class simTestActiveNumbersPage extends pageBase{
                 }
                 if (!found) {
                     retryCount++;
-                    System.out.println("⏳ Not found yet, retrying in 30 seconds...");
+                    System.out.println("⏳ The reserved number not found yet, retrying in 30 seconds...");
 
                     Thread.sleep(30000);
                 }

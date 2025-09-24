@@ -7,6 +7,7 @@ import Utilities.EmailReportSender;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +55,27 @@ public class HtmlReportListener implements ITestListener {
         model.setPackagePrice(testDataHolder.packagePriceData);
         model.setSubscriptionTimestamp(testDataHolder.subscriptionTimeStampData);
         model.setOtpCode(testDataHolder.otpCodeData);
+
+        // Auto comment based on result
+        if ("PASS".equals(status)) {
+            model.setComment("Test executed successfully ✅");
+        } else if ("FAIL".equals(status)) {
+            String errorMessage = "Unknown error";
+
+            if (result.getThrowable() != null) {
+                errorMessage = result.getThrowable().getMessage();
+
+                // لو الرسالة فيها Expected condition هنقص من أولها ونشيل الباقي
+                if (errorMessage.contains("Expected condition")) {
+                    errorMessage = errorMessage.substring(0, errorMessage.indexOf("Expected condition")).trim();
+                }
+            }
+
+            model.setComment("❌ Error occurred: " + errorMessage);
+
+        } else if ("SKIPPED".equals(status)) {
+            model.setComment("Test was skipped ⚠️");
+        }
 
         reportDataList.add(model);
     }

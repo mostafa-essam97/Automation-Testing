@@ -16,8 +16,6 @@ import java.util.List;
 
 public class shofhaPackages extends pageBase {
     public String subscriptionTimestamp = "";
-//    public String packageType = "";
-//    public String packagePrice = "";
 
     public shofhaPackages(WebDriver driver) {
         super(driver);
@@ -47,7 +45,6 @@ public class shofhaPackages extends pageBase {
                 System.out.println("❌ Invalid index. Available packages: " + packages.size());
                 Assert.fail("❌ Invalid index: '" + index + "'. Available packages: '" + packages.size() + "'.");
             } else {
-                System.out.println("👉 You are going to subscribe with the " + getOrdinal(index + 1) + " package.");
                 WebElement selectedPackage = packages.get(index);
 
                 // جبت نوع الباقة (Daily, Weekly, Monthly ...)
@@ -65,7 +62,9 @@ public class shofhaPackages extends pageBase {
                 // زرار Subscribe
                 WebElement subNowBtn = selectedPackage.findElement(By.tagName("button"));
                 wait.until(ExpectedConditions.elementToBeClickable(subNowBtn));
+                Thread.sleep(2000);
                 subNowBtn.click();
+                System.out.println("👉 You are going to subscribe with the " + getOrdinal(index + 1) + " package.");
                 Thread.sleep(1000);
 
                 // ✅ هنا استخدمنا الفاكشن من pageBase

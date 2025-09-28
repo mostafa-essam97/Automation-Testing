@@ -32,6 +32,8 @@ public class accessShofhaPortal extends pageBase {
             System.out.println("✅ Shofha opened in new tab successfully.");
         } catch (Exception e) {
             System.out.println("❌ Failed to open Shofha in new tab: " + e.getMessage());
+
+
             Assert.fail("Can't open Shofha website in new tab.");
         }
     }

@@ -17,7 +17,7 @@ public class EmailReportSender {
 //                "tatadarsh97@gmail.com",
                 "mustafa.essam@shofha.com",
                 "mohamed.abouelnaga@shofha.com",
-//                "mohamed.osama@arpuplus.com"
+                "mohamed.osama@arpuplus.com"
        };
 
         Properties props = new Properties();

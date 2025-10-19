@@ -14,9 +14,9 @@ public class EmailReportSender {
 
         // ايميلات الاستقبال (ممكن تزود أي عدد)
         String[] toEmails = {
-                "tatadarsh97@gmail.com",
-//                "mustafa.essam@shofha.com",
-//                "mohamed.abouelnaga@shofha.com",
+//                "tatadarsh97@gmail.com",
+                "mustafa.essam@shofha.com",
+                "mohamed.abouelnaga@shofha.com",
 //                "mohamed.osama@arpuplus.com"
        };
 

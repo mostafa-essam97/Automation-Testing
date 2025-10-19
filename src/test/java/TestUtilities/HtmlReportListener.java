@@ -74,7 +74,7 @@ public class HtmlReportListener implements ITestListener {
             model.setComment("❌ Error occurred: " + errorMessage);
 
         } else if ("SKIPPED".equals(status)) {
-            model.setComment("Test was skipped ⚠️");
+            model.setComment("Test was skipped, Internet Low Connection ⚠️");
         }
 
         reportDataList.add(model);

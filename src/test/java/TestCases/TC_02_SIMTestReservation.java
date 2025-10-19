@@ -15,10 +15,10 @@ public class TC_02_SIMTestReservation extends testBase{
 
 
         home.openReservations();
-        reserve.selectCountry("Bahrain");
+        reserve.selectCountry("United Arab Emirates");
         num.chooseNumberByIndex(0);
         slot.accessFreeSlotsBtn();
-        slot.chooseFreeSlotByIndex(1);
+        slot.chooseFreeSlotByIndex(2);
         home.openTestingTap();
         home.openSMS();
         active.verifyReservedNumberInActiveList(testDataHolder.reservedNumberTextData);

@@ -56,6 +56,9 @@ public class simTestMessages extends pageBase {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime subscriptionTime = LocalDateTime.parse(subscriptionTimestamp, formatter);
 
+        int subMinutes = subscriptionTime.getMinute();
+        int subSeconds = subscriptionTime.getSecond();
+
         int retries = 5;
         int waitTimeInSeconds = 30;
 
@@ -84,7 +87,14 @@ public class simTestMessages extends pageBase {
                         String messageTime = message.findElement(By.className("sms-time")).getText().trim();
                         LocalDateTime msgTime = LocalDateTime.parse(messageTime, formatter);
 
-                        if (msgTime.isAfter(subscriptionTime)) {
+                        int msgMinutes = msgTime.getMinute();
+                        int msgSeconds = msgTime.getSecond();
+
+                        boolean isAfterSubscription =
+                                (msgMinutes > subMinutes) ||
+                                        (msgMinutes == subMinutes && msgSeconds >= subSeconds);
+
+                        if (isAfterSubscription) {
                             WebElement body = message.findElement(By.className("sms-body"));
                             String text = body.getText();
 
@@ -102,7 +112,7 @@ public class simTestMessages extends pageBase {
                                 System.out.println("⚠️ Message at " + msgTime + " has no OTP.");
                             }
                         } else {
-                            System.out.println("⏳ Message at " + msgTime + " is before subscription time. Ignoring...");
+                            System.out.println("⏳ Message at " + msgTime + " is before subscription time (minute-second compare). Ignoring...");
                         }
                     }
 

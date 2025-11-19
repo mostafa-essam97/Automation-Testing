@@ -24,10 +24,11 @@ public class EmailReportSender {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.host", host);
-        props.put("mail.smtp.port", "465");
-        props.put("mail.smtp.ssl.enable", "true");   // ✅ استخدام SSL
-        props.put("mail.smtp.starttls.enable", "false"); // ✅ مش هنستخدم STARTTLS مع 465
-
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.ssl.trust", "mail.privateemail.com");
+        //props.put("mail.smtp.ssl.enable", "true");   // ✅ استخدام SSL
+        //props.put("mail.smtp.starttls.enable", "false"); // ✅ مش هنستخدم STARTTLS مع 465
         Session session = Session.getInstance(props, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(from, password);

@@ -15,10 +15,8 @@
         <listener class-name="TestUtilities.HtmlReportListener"/>
     </listeners>
 
-
     <!-- Regression Test Suite -->
     <test name="Regression_Test_Suite" preserve-order="true">
-
         <classes>
             <class name="TestCases.TC_01_SIMTESTLogin"/>
             <class name="TestCases.TC_02_SIMTestReservation"/>
@@ -27,6 +25,5 @@
             <class name="TestCases.TC_05_VerifyPortalOTP"/>
             <class name="TestCases.TC_06_CancelUserSubscription"/>
         </classes>
-
     </test>
 </suite>

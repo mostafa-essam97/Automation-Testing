@@ -1,78 +1,104 @@
 package Pages;
 
-import Utilities.testDataHolder;
+import Utilities.TestContext;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 
-import java.time.Duration;
 import java.util.List;
 
-public class simTestReserveFreeSlotPage extends pageBase{
+/**
+ * SimtestReserveFreeSlotPage - Page Object for free slot reservation in SIMTest
+ */
+public class simTestReserveFreeSlotPage extends BasePage {
+
     public simTestReserveFreeSlotPage(WebDriver driver) {
         super(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
-    //Define Elements
+    // ============ Elements ============
+
     @FindBy(id = "btnFindFreeSlots")
-    WebElement findSlot;
+    private WebElement findSlotBtn;
 
     @FindBy(id = "dlgFreeSlots")
-    WebElement freeSlotsDialog;
+    private WebElement freeSlotsDialog;
 
-    @FindBy(xpath = "//*[@id=" +
-            "'divFreeSlots']/div[contains(@style,'display: inline-block')]")
-    List<WebElement> freeNumberSlots;
+    @FindBy(xpath = "//*[@id='divFreeSlots']/div[contains(@style,'display: inline-block')]")
+    private List<WebElement> freeNumberSlots;
 
     @FindBy(xpath = "/html/body/div[13]/div")
-    WebElement confirmReservationPopup;
+    private WebElement confirmReservationPopup;
 
     @FindBy(xpath = "/html/body/div[13]/div/div/p")
-    WebElement confirmationMessage;
+    private WebElement confirmationMessage;
 
+    // ============ Actions ============
 
-    //Define Functions
-    public void accessFreeSlotsBtn() {
+    /**
+     * Click the Find Free Slots button
+     */
+    public void clickFindFreeSlots() {
         String expectedBtnText = "FIND FREE SLOTS";
         try {
-            if (findSlot.getText().equalsIgnoreCase(expectedBtnText)) {
-                findSlot.click();
-                System.out.println("The ' find free slot ' button is available and clicked, Please select one free slot. ");
+            logger.info("Looking for Find Free Slots button...");
+            
+            String btnText = findSlotBtn.getText();
+            if (btnText.equalsIgnoreCase(expectedBtnText)) {
+                click(findSlotBtn);
+                logger.info("Find Free Slots button clicked");
             } else {
-                System.out.println("The ' find free slot ' button doesn't available for this number. " + testDataHolder.fullReservedNumberData);
-                Assert.fail("The ' find free slots' button doesn't available for this number. " + testDataHolder.fullReservedNumberData);
+                String number = TestContext.getData().getFullReservedNumber();
+                logger.error("Find Free Slots button not available for number: {}", number);
+                Assert.fail("Find Free Slots button not available for: " + number);
             }
         } catch (Exception e) {
-            System.out.println("Something want wrong, Please retry. " + e.getMessage());
+            logger.error("Failed to click Find Free Slots: {}", e.getMessage());
+            Assert.fail("Cannot click Find Free Slots button: " + e.getMessage());
         }
     }
 
+    /**
+     * Choose a free slot by index
+     */
     public void chooseFreeSlotByIndex(int index) {
         try {
+            logger.info("Selecting free slot at index: {}", index);
+            
+            // Wait for dialog
             wait.until(ExpectedConditions.visibilityOf(freeSlotsDialog));
+
             if (freeNumberSlots.isEmpty()) {
-                Assert.fail("There are no free slots current now. Retry later. ");
+                Assert.fail("No free slots available. Try again later.");
             }
+
             if (index < 0 || index >= freeNumberSlots.size()) {
-                Assert.fail(index + " is invalid index. The available slots count is " + freeNumberSlots.size());
+                Assert.fail("Invalid index: " + index + ". Available slots: " + freeNumberSlots.size());
             }
-            if (index >= 0 && index <= freeNumberSlots.size()) {
-                WebElement targetslot = freeNumberSlots.get(index);
-                WebElement reserveFreeSlotBtn = targetslot.findElement(By.tagName("button"));
-                reserveFreeSlotBtn.click();
-                System.out.println("You have been chose the " + getOrdinal(index + 1) + " slot.");
-                wait.until(ExpectedConditions.visibilityOf(confirmReservationPopup));
-                Assert.assertEquals(confirmationMessage.getText(), "Reservation successfully created");
-                System.out.println("The number reserved successfully. ");
-            }
+
+            // Get and click the slot
+            WebElement targetSlot = freeNumberSlots.get(index);
+            WebElement reserveBtn = targetSlot.findElement(By.tagName("button"));
+            click(reserveBtn);
+
+            logger.info("Selected {} slot", getOrdinal(index + 1));
+
+            // Wait for confirmation popup
+            wait.until(ExpectedConditions.visibilityOf(confirmReservationPopup));
+            
+            // Verify success message
+            String message = confirmationMessage.getText();
+            Assert.assertEquals(message, "Reservation successfully created",
+                    "Expected success message but got: " + message);
+
+            logger.info("Number reserved successfully");
+
         } catch (Exception e) {
-            System.out.println("Something want wrong, Please retry. " + e.getMessage());
-            Assert.fail("Can't reserve the free number slot at index = " + index + "\n" + e.getMessage());
+            logger.error("Failed to reserve slot at index {}: {}", index, e.getMessage());
+            Assert.fail("Cannot reserve free slot at index " + index + ": " + e.getMessage());
         }
     }
 }

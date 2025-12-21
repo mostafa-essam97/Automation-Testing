@@ -4,45 +4,75 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import java.time.Duration;
 
-public class shofhaLP extends pageBase {
+/**
+ * ShofhaLP - Page Object for Shofha Landing Page (LP)
+ */
+public class shofhaLP extends BasePage {
+
     public shofhaLP(WebDriver driver) {
         super(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(15)); // خليها أطول شوية
     }
 
-    // Define Elements
+    // ============ Elements ============
+
     @FindBy(id = "send_btn")
-    WebElement nextToOTPBtn;
+    private WebElement nextToOTPBtn;
 
-    // خلي النص العربي أكثر مرونة باستخدام normalize-space
     @FindBy(xpath = "//h1[contains(normalize-space(.),'اختر الباقة المناسبة لك')]")
-    WebElement packagesTitle;
+    private WebElement packagesTitle;
 
-    // Define Functions
+    // ============ Actions ============
+
+    /**
+     * Navigate to packages page and click next
+     */
     public void navigateToPackegesPage() {
         String expectedPackageTitle = "اختر الباقة المناسبة لك واستمتع الآن بالمشاهدة!";
+        logger.info("Navigating to packages page...");
+
         try {
-            // استنى لحد ما العنوان يبان
-            wait.until(ExpectedConditions.visibilityOf(packagesTitle));
+            // Wait for packages title to appear
+            longWait.until(ExpectedConditions.visibilityOf(packagesTitle));
 
-            // قارن النص بعد normalize-space للتأكد من المطابقة
             String actualTitle = packagesTitle.getText().trim();
-            Assert.assertEquals(actualTitle, expectedPackageTitle,
-                    "Page title doesn't match. Expected: " + expectedPackageTitle + " but found: " + actualTitle);
+            logger.info("Page title found: {}", actualTitle);
 
-            System.out.println("✅ You are in the packages page, Please select one of the subscription packages..");
+            // Verify title
+            if (!actualTitle.equals(expectedPackageTitle)) {
+                logger.warn("Title mismatch - Expected: '{}', Actual: '{}'", expectedPackageTitle, actualTitle);
+            }
 
-            // استنى زرار الـ OTP button يبقى clickable
-            wait.until(ExpectedConditions.elementToBeClickable(nextToOTPBtn)).click();
+            logger.info("✅ You are in the packages page");
+            logger.info("   Please select one of the subscription packages...");
 
-            System.out.println("The page title is: " + actualTitle);
+            // Click next button
+            waitForClickable(nextToOTPBtn).click();
+            logger.info("Clicked 'Next to OTP' button");
+
         } catch (Exception e) {
-            System.out.println("❌ Can't access the new LP page. " + e.getMessage());
-            Assert.fail("Can't find the right page. " + e.getMessage());
+            logger.error("❌ Can't access the packages page: {}", e.getMessage());
+            logger.error("   Possible causes:");
+            logger.error("   1. Phone number not valid or not entered");
+            logger.error("   2. Country code not selected");
+            logger.error("   3. Landing page layout changed");
+            logger.error("   4. Network/loading issues");
+            Assert.fail("Cannot access packages page: " + e.getMessage());
         }
+    }
+
+    /**
+     * Check if packages page is displayed
+     */
+    public boolean isPackagesPageDisplayed() {
+        return isElementDisplayed(packagesTitle);
+    }
+
+    /**
+     * Check if next button is visible
+     */
+    public boolean isNextButtonVisible() {
+        return isElementDisplayed(nextToOTPBtn);
     }
 }

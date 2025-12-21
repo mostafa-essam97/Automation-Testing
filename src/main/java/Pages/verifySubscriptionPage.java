@@ -3,45 +3,87 @@ package Pages;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 
-import java.time.Duration;
+/**
+ * VerifySubscriptionPage - Page Object for OTP verification
+ */
+public class verifySubscriptionPage extends BasePage {
 
-public class verifySubscriptionPage extends pageBase{
     public verifySubscriptionPage(WebDriver driver) {
         super(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    //Define Elements
+    // ============ Elements ============
+
     @FindBy(name = "code")
-    WebElement pinCode;
+    private WebElement pinCodeField;
 
     @FindBy(id = "verify_btn")
-    WebElement verifyBtn;
+    private WebElement verifyBtn;
 
-    //Define Functions
-    public void insertPinCode(String verifyCode){
+    // ============ Actions ============
+
+    /**
+     * Insert OTP/PIN code
+     */
+    public void insertPinCode(String verifyCode) {
         try {
-            wait.until(ExpectedConditions.elementToBeClickable(pinCode)).sendKeys(verifyCode);
-            System.out.println("Pin Code inserted successfully. " + verifyCode);
+            logger.info("Inserting PIN code...");
+            
+            sendKeys(pinCodeField, verifyCode);
+            
+            logger.info("PIN code inserted successfully");
         } catch (Exception e) {
-            System.out.println("Something want wrong. " + e.getMessage());
-            Assert.fail("Can't insert the OTP. "+ e.getMessage());
+            logger.error("Failed to insert PIN code: {}", e.getMessage());
+            Assert.fail("Cannot insert OTP: " + e.getMessage());
         }
     }
 
-
-    public void accessVerifyBtn(){
+    /**
+     * Click verify button
+     */
+    public void clickVerifyButton() {
         try {
-            wait.until(ExpectedConditions.elementToBeClickable(verifyBtn)).click();
-            //Assert.assertEquals(verifyBtn.getText(),"تحقق");
-            System.out.println("Verify button clicked successfully.\nCongratulations your are subscribed on Shofha enjoy watching.");
+            logger.info("Clicking verify button...");
+            
+            click(verifyBtn);
+            
+            // Wait for verification to process
+            waitForPageStability();
+            
+            logger.info("Verify button clicked successfully");
+            logger.info("Congratulations! You are now subscribed to Shofha. Enjoy watching!");
         } catch (Exception e) {
-            System.out.println("Something want wrong. " + e.getMessage());
-            Assert.fail("Can't insert the OTP. "+ e.getMessage());
+            logger.error("Failed to click verify button: {}", e.getMessage());
+            Assert.fail("Cannot verify OTP: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Complete OTP verification (insert code and verify)
+     */
+    public void completeVerification(String otpCode) {
+        insertPinCode(otpCode);
+        clickVerifyButton();
+    }
+
+    /**
+     * Check if verification page is displayed
+     */
+    public boolean isVerificationPageDisplayed() {
+        return isElementDisplayed(pinCodeField) && isElementDisplayed(verifyBtn);
+    }
+
+    /**
+     * Clear PIN code field
+     */
+    public void clearPinCode() {
+        try {
+            waitForClickable(pinCodeField).clear();
+            logger.info("PIN code field cleared");
+        } catch (Exception e) {
+            logger.warn("Could not clear PIN code field: {}", e.getMessage());
         }
     }
 }

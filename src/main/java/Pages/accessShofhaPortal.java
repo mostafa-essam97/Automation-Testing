@@ -2,68 +2,155 @@ package Pages;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-public class accessShofhaPortal extends pageBase {
+/**
+ * AccessShofhaPortal - Page Object for handling browser tabs/windows
+ */
+public class accessShofhaPortal extends BasePage {
+    
+    private static final String SHOFHA_URL = "https://shofha.com/";
+
     public accessShofhaPortal(WebDriver driver) {
         super(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(5));
     }
-    //Define Elements
 
-    //Define Functions
-    public void openShofhaInNewTap() {
+    // ============ Actions ============
+
+    /**
+     * Open Shofha website in a new browser tab
+     */
+    public void openShofhaInNewTab() {
+        openUrlInNewTab(SHOFHA_URL);
+    }
+
+    /**
+     * Open any URL in a new browser tab
+     * 
+     * @param url The URL to open in new tab
+     */
+    public void openUrlInNewTab(String url) {
         try {
-            ((JavascriptExecutor) driver).executeScript("window.open()");
-
-            // خزن كل التابات المفتوحة
-            List<String> openedTaps = new ArrayList<>(driver.getWindowHandles());
-
-            // Open last tap
-            driver.switchTo().window(openedTaps.get(openedTaps.size() - 1));
-
-            //Open shofha portal
-            driver.get("https://shofha.com/");
-            System.out.println("✅ Shofha opened in new tab successfully.");
+            logger.info("Opening URL in new tab: {}", url);
+            
+            // Open new tab using JavaScript
+            executeScript("window.open()");
+            
+            // Get all window handles and switch to the last one
+            List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+            driver.switchTo().window(tabs.get(tabs.size() - 1));
+            
+            logger.info("Switched to new tab (total tabs: {})", tabs.size());
+            
+            // Navigate to URL
+            driver.get(url);
+            
+            // Wait for page to load
+            waitForPageStability();
+            
+            String currentUrl = driver.getCurrentUrl();
+            logger.info("✅ Page opened successfully: {}", currentUrl);
+            
         } catch (Exception e) {
-            System.out.println("❌ Failed to open Shofha in new tab: " + e.getMessage());
-
-
-            Assert.fail("Can't open Shofha website in new tab.");
+            logger.error("❌ Failed to open URL in new tab: {}", url);
+            logger.error("   Error: {}", e.getMessage());
+            Assert.fail("Cannot open URL in new tab: " + url + " - " + e.getMessage());
         }
     }
 
+    /**
+     * Switch back to the SIMTest tab (first tab)
+     */
     public void switchBackToSimtestTab() {
         try {
+            logger.info("Switching back to SIMTest tab...");
+            
             List<String> tabs = new ArrayList<>(driver.getWindowHandles());
-
-            // ارجع لأول تابة (اللي فيها SIMTest)
+            
+            if (tabs.isEmpty()) {
+                throw new RuntimeException("No browser tabs available");
+            }
+            
+            // Switch to first tab (SIMTest)
             driver.switchTo().window(tabs.get(0));
-            System.out.println("🔁 Switched back to SIMTest tab.");
-            Thread.sleep(3000);
-
+            
+            // Wait for page to be ready
+            waitForPageStability();
+            
+            logger.info("Switched back to SIMTest tab");
         } catch (Exception e) {
-            System.out.println("❌ Failed to switch back to SIMTest tab: " + e.getMessage());
-            Assert.fail("Can't switch back to SIMTest tab.");
+            logger.error("Failed to switch to SIMTest tab: {}", e.getMessage());
+            Assert.fail("Cannot switch back to SIMTest tab: " + e.getMessage());
         }
     }
 
-    public void switchFromSimtestTabToShofhaTap() {
+    /**
+     * Switch from SIMTest tab to Shofha tab (second tab)
+     */
+    public void switchFromSimtestTabToShofhaTab() {
         try {
+            logger.info("Switching to Shofha tab...");
+            
             List<String> tabs = new ArrayList<>(driver.getWindowHandles());
-
-            // ارجع لأول تابة (اللي فيها Shofha)
+            
+            if (tabs.size() < 2) {
+                throw new RuntimeException("Shofha tab not found. Available tabs: " + tabs.size());
+            }
+            
+            // Switch to second tab (Shofha)
             driver.switchTo().window(tabs.get(1));
-            System.out.println("🔁 Switched back to Shofha tab.");
-            Thread.sleep(3000);
+            
+            // Wait for page to be ready
+            waitForPageStability();
+            
+            logger.info("Switched to Shofha tab");
         } catch (Exception e) {
-            System.out.println("❌ Failed to switch back to Shofha tab: " + e.getMessage());
-            Assert.fail("Can't switch back to Shofha tab.");
+            logger.error("Failed to switch to Shofha tab: {}", e.getMessage());
+            Assert.fail("Cannot switch to Shofha tab: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Close current tab and switch to another
+     */
+    public void closeCurrentTabAndSwitchTo(int tabIndex) {
+        try {
+            driver.close();
+            
+            List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+            if (tabIndex < tabs.size()) {
+                driver.switchTo().window(tabs.get(tabIndex));
+                logger.info("Closed tab and switched to tab index: {}", tabIndex);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to close tab: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Get number of open tabs
+     */
+    public int getNumberOfOpenTabs() {
+        Set<String> handles = driver.getWindowHandles();
+        return handles.size();
+    }
+
+    /**
+     * Switch to tab by index
+     */
+    public void switchToTab(int index) {
+        List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+        if (index >= 0 && index < tabs.size()) {
+            driver.switchTo().window(tabs.get(index));
+            waitForPageStability();
+            logger.info("Switched to tab index: {}", index);
+        } else {
+            logger.warn("Invalid tab index: {}. Available: {}", index, tabs.size());
         }
     }
 }

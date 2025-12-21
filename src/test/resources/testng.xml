@@ -6,13 +6,11 @@
     <!-- Parameters -->
     <parameter name="browser" value="chrome"/>
 
-    <!-- Listeners (بتشتغل على السويت كله) -->
-<!--    <listeners>-->
-<!--        <listener class-name="TestUtilities.TestListener"/>-->
-<!--    </listeners>-->
-
+    <!-- Listeners -->
     <listeners>
+        <listener class-name="TestUtilities.TestListener"/>
         <listener class-name="TestUtilities.HtmlReportListener"/>
+        <listener class-name="TestUtilities.RetryTransformer"/>
     </listeners>
 
     <!-- Regression Test Suite -->

@@ -1,72 +1,76 @@
 package Pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import Utilities.testDataHolder;
 
-
-import java.time.Duration;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class simtestSelectCountryPage extends pageBase {
+/**
+ * SimtestSelectCountryPage - Page Object for country selection in SIMTest
+ */
+public class simtestSelectCountryPage extends BasePage {
+
+    private static final int MAX_RETRY_ATTEMPTS = 3;
+
     public simtestSelectCountryPage(WebDriver driver) {
         super(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
-    // Define Elements
+    // ============ Actions ============
 
-
-    // Define Functions
+    /**
+     * Select a country from the dropdown by name
+     */
     public void selectCountry(String countryName) {
-        int maxAttempts = 3;
         int attempt = 1;
         boolean isCountryFound = false;
 
-        while (attempt <= maxAttempts && !isCountryFound) {
+        while (attempt <= MAX_RETRY_ATTEMPTS && !isCountryFound) {
             try {
-                System.out.println("🔁 Attempt #" + attempt + " to select country: " + countryName);
+                logger.info("Attempt #{} to select country: {}", attempt, countryName);
 
-                WebElement menu = driver.findElement(By.xpath("//span[contains(@class,'k-input') and text()='Select a country...']"));
+                // Find and click the country dropdown
+                WebElement menu = driver.findElement(
+                        By.xpath("//span[contains(@class,'k-input') and text()='Select a country...']"));
                 wait.until(ExpectedConditions.visibilityOf(menu));
                 menu.click();
-                Thread.sleep(2000);
+                
+                // Wait for dropdown to open
+                waitForPageStability();
 
+                // Find all country options
                 List<WebElement> countries = driver.findElements(By.cssSelector("li[role='option']"));
+                
                 for (WebElement country : countries) {
                     if (country.getText().trim().equalsIgnoreCase(countryName.trim())) {
                         country.click();
-                        System.out.println("✅ You have selected '" + countryName + "' successfully.");
-                        Thread.sleep(2000);
+                        logger.info("Selected country: {}", countryName);
+                        waitForPageStability();
                         isCountryFound = true;
                         break;
                     }
                 }
 
                 if (!isCountryFound) {
-                    System.out.println("❌ The Country '" + countryName + "' is not found in the list.");
+                    logger.warn("Country '{}' not found in attempt #{}", countryName, attempt);
                     attempt++;
-                    Thread.sleep(1000); // Pause before retry
                 }
 
-            } catch (org.openqa.selenium.StaleElementReferenceException staleEx) {
-                System.out.println("⚠️ StaleElementException detected. Retrying... Attempt #" + attempt);
+            } catch (StaleElementReferenceException staleEx) {
+                logger.warn("StaleElementException - retrying... Attempt #{}", attempt);
                 attempt++;
             } catch (Exception e) {
-                System.out.println("❌ General error during country selection: " + e.getMessage());
-                Assert.fail("Can't find country: '" + countryName + "' | Error: " + e.getMessage());
+                logger.error("Error during country selection: {}", e.getMessage());
+                Assert.fail("Cannot find country: '" + countryName + "' | Error: " + e.getMessage());
             }
         }
 
         if (!isCountryFound) {
-            Assert.fail("❌ Failed to find country '" + countryName + "' after " + maxAttempts + " attempts.");
+            Assert.fail("Failed to find country '" + countryName + "' after " + MAX_RETRY_ATTEMPTS + " attempts");
         }
     }
 }

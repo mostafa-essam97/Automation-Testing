@@ -3,41 +3,60 @@ package Pages;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 
-import java.time.Duration;
+/**
+ * SimtestLoginPage - Page Object for SIMTest login functionality
+ */
+public class simtestLoginPage extends BasePage {
 
-public class simtestLoginPage extends pageBase{
     public simtestLoginPage(WebDriver driver) {
         super(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(5));
     }
-    //Define Element
+
+    // ============ Elements ============
+    
     @FindBy(id = "username")
-    WebElement usernameField;
+    private WebElement usernameField;
 
     @FindBy(id = "password")
-    WebElement passwordField;
+    private WebElement passwordField;
 
     @FindBy(xpath = "//input[@type='submit' and @value='Sign In']")
-    WebElement signInBtn;
+    private WebElement signInBtn;
 
-    //Define Function
-    public void simTestlogin(String simTestUsername, String simTestPassword){
+    // ============ Actions ============
+
+    /**
+     * Login to SIMTest with provided credentials
+     */
+    public void login(String username, String password) {
         try {
-            wait.until(ExpectedConditions.elementToBeClickable(usernameField))
-                    .sendKeys(simTestUsername);
-            System.out.println("Username inserted successfully ==> " + simTestUsername);
-            wait.until(ExpectedConditions.elementToBeClickable(passwordField))
-                    .sendKeys(simTestPassword);
-            System.out.println("Password inserted successfully ==> " + simTestPassword);
-            wait.until(ExpectedConditions.elementToBeClickable(signInBtn))
-                    .click();
-            System.out.println("Login successfully.");
+            logger.info("Attempting to login with username: {}", username);
+            
+            sendKeys(usernameField, username);
+            logger.info("Username entered successfully");
+            
+            sendKeys(passwordField, password);
+            logger.info("Password entered successfully");
+            
+            click(signInBtn);
+            logger.info("Login button clicked");
+            
+            // Wait for page to load after login
+            waitForPageStability();
+            
+            logger.info("Login completed successfully");
+        } catch (Exception e) {
+            logger.error("Login failed: {}", e.getMessage());
+            Assert.fail("Login failed: " + e.getMessage());
         }
-        catch (Exception e){
-            System.out.println("Something want wrong, Please retry. " + e.getMessage());
-        }
+    }
+
+    /**
+     * Check if login page is displayed
+     */
+    public boolean isLoginPageDisplayed() {
+        return isElementDisplayed(usernameField) && isElementDisplayed(passwordField);
     }
 }

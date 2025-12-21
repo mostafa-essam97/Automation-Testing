@@ -1,38 +1,71 @@
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Compiled class files
+*.class
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
+# Package files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# IDE - IntelliJ
+.idea/
 *.iml
 *.ipr
+*.iws
+out/
 
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
+# IDE - Eclipse
+.settings/
 .project
-.settings
-.springBeans
-.sts4-cache
+.classpath
+bin/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# IDE - VS Code
 .vscode/
 
-### Mac OS ###
+# IDE - NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+
+# Test outputs
+test-output/
+Reports/
+*.log
+
+# Screenshots (can be large)
+test-output/screenshots/
+
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Sensitive configuration - IMPORTANT!
+# If you store real credentials in config, uncomment below:
+# src/test/resources/config.properties
+
+# Local environment files
+.env
+.env.local
+*.env
+
+# Credentials files
+*credentials*
+*secrets*

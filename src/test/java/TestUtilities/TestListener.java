@@ -1,162 +1,186 @@
 package TestUtilities;
 
-import Utilities.testDataHolder;
 import Utilities.EmailReportSender;
+import Utilities.TestContext;
+import com.aventstack.extentreports.Status;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
-import com.aventstack.extentreports.Status;
 
+/**
+ * TestListener - TestNG listener for test events and reporting
+ */
 public class TestListener implements ITestListener {
+    private static final Logger logger = LoggerFactory.getLogger(TestListener.class);
 
     @Override
     public void onTestStart(ITestResult result) {
-        // بيشتغل أول ما التست يبدأ
+        logger.info("🚀 Starting test: {}", result.getMethod().getMethodName());
         ExtentTestManager.startTest(result.getMethod().getMethodName());
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
+        logger.info("✅ Test PASSED: {}", result.getMethod().getMethodName());
         ExtentTestManager.getTest().log(Status.PASS, "Test Passed");
 
-        logSimtestLoginInfo(); // اضافه معلومات تسجيل دخول ل SimTest
-        logReservationInfo(); // إضافة الرقم والبلد
-        logOTPInfo();  // اضافه معلومات ال OTP
-
-        // ✅ نتحقق من اسم التست ونضيف الرسالة المخصصة
-        switch (result.getMethod().getMethodName()) {
-            case "openShofha":
-                userPackageInfo();
-                break;
-
-            case "otpVerification":
-                logSubscriptionSuccess();
-                userPackageInfo();
-                break;
-
-            case "userCancelSubscription":
-                logCancellationSuccess();
-                userPackageInfo();
-                break;
-
-            default:
-                // باقي التستات مش محتاجة رسائل إضافية
-                break;
-        }
+        logTestInfo();
+        logTestSpecificInfo(result, true);
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
-        WebDriver driver = DriverManager.getDriver(null);
-        String screenshotPath = ScreenshotUtil.takeScreenshot(driver, result.getName());
-        ExtentTestManager.getTest().fail("Test Failed, Screenshot attached: " +
-                ExtentTestManager.getTest().addScreenCaptureFromPath(screenshotPath));
-
-        logSimtestLoginInfo(); // اضافه معلومات تسجيل دخول ل SimTest
-        logReservationInfo(); // إضافة الرقم والبلد
-        logOTPInfo();  // اضافه معلومات ال OTP
-
-        // ✅ Custom Failure Logs
-        if (result.getMethod().getMethodName().equals("otpVerification")) {
-            logSubscriptionFailure();
-            userPackageInfo();
-        } else if (result.getMethod().getMethodName().equals("userCancelSubscription")) {
-            logCancellationFailure();
-            userPackageInfo();
+        logger.error("❌ Test FAILED: {}", result.getMethod().getMethodName());
+        
+        // Take screenshot
+        WebDriver driver = DriverManager.getDriver();
+        if (driver != null) {
+            String screenshotPath = ScreenshotUtil.takeScreenshot(driver, result.getName());
+            ExtentTestManager.getTest().fail("Test Failed - Screenshot: " +
+                    ExtentTestManager.getTest().addScreenCaptureFromPath(screenshotPath));
+        } else {
+            ExtentTestManager.getTest().fail("Test Failed: " + result.getThrowable().getMessage());
         }
+
+        logTestInfo();
+        logTestSpecificInfo(result, false);
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
+        logger.warn("⏭️ Test SKIPPED: {}", result.getMethod().getMethodName());
         ExtentTestManager.getTest().log(Status.SKIP, "Test Skipped: " + result.getThrowable());
-
-        logSimtestLoginInfo(); // اضافه معلومات تسجيل دخول ل SimTest
-        logReservationInfo(); // إضافة الرقم والبلد
-        logOTPInfo();  // اضافه معلومات ال OTP
-
+        logTestInfo();
     }
 
     @Override
     public void onStart(ITestContext context) {
-        System.out.println("Test Suite Started: " + context.getName());
+        logger.info("========================================");
+        logger.info("🏁 Test Suite Started: {}", context.getName());
+        logger.info("========================================");
     }
 
     @Override
     public void onFinish(ITestContext context) {
-        System.out.println("Test Suite Finished: " + context.getName());
+        logger.info("========================================");
+        logger.info("🏁 Test Suite Finished: {}", context.getName());
+        logger.info("   Total: {} | Passed: {} | Failed: {} | Skipped: {}",
+                context.getAllTestMethods().length,
+                context.getPassedTests().size(),
+                context.getFailedTests().size(),
+                context.getSkippedTests().size());
+        logger.info("========================================");
 
-        // بعد ما يتعمل flush للـ report
+        // Flush report
         ExtentManager.getInstance().flush();
 
-        // المسار بتاع التقرير
-        String reportPath = System.getProperty("user.dir") + "/test-output/ExtentReport.html";
+        // Email is now sent by HtmlReportListener (HTML Table format)
+        // ExtentReport Dashboard email disabled:
+        // String reportPath = System.getProperty("user.dir") + "/test-output/ExtentReport.html";
+        // EmailReportSender.sendReportByEmail(reportPath);
+    }
 
-        // ننده على كلاس الميل
-        EmailReportSender.sendReportByEmail(reportPath);
+    // ============ Private Helper Methods ============
+
+    private void logTestInfo() {
+        logSimtestLoginInfo();
+        logReservationInfo();
+        logOTPInfo();
     }
 
     private void logSimtestLoginInfo() {
-        if (testDataHolder.simtestUsernameData != null) {
+        TestContext.TestData data = TestContext.getData();
+        String username = data.getSimtestUsername();
+        
+        if (username != null) {
             ExtentTestManager.getTest().log(Status.INFO,
-                    "👤 SimTest Login - Username: <b>" + testDataHolder.simtestUsernameData + "</b>");
-
-            if (testDataHolder.simtestPasswordData != null) {
-                ExtentTestManager.getTest().log(Status.INFO,
-                        "🔒 SimTest Password: ******"); // Masked
-            }
+                    "👤 SimTest Login - Username: <b>" + username + "</b>");
+            ExtentTestManager.getTest().log(Status.INFO,
+                    "🔒 SimTest Password: ******");
         } else {
             ExtentTestManager.getTest().log(Status.INFO,
-                    "⚠️ No SimTest login info found for this test.");
+                    "⚠️ No SimTest login info for this test");
         }
     }
 
-
-
-    // ميثود خاصة بتسجيل الرقم والبلد في التقرير
     private void logReservationInfo() {
-        if (testDataHolder.fullReservedNumberData != null && testDataHolder.countryCodeData != null) {
+        TestContext.TestData data = TestContext.getData();
+        String number = data.getFullReservedNumber();
+        String country = data.getCountryCode();
+        
+        if (number != null && country != null) {
             ExtentTestManager.getTest().log(Status.INFO,
-                    "📱 Reserved Number: " + testDataHolder.reservedNumberTextData);
+                    "📱 Reserved Number: " + data.getReservedNumberText());
         } else {
             ExtentTestManager.getTest().log(Status.INFO,
-                    "⚠️ No reservation data found for this test.");
+                    "⚠️ No reservation data for this test");
         }
     }
 
     private void logOTPInfo() {
-        if (testDataHolder.otpCodeData != null) {
+        TestContext.TestData data = TestContext.getData();
+        String otp = data.getOtpCode();
+        
+        if (otp != null) {
             ExtentTestManager.getTest().log(Status.INFO,
-                    "🔑 OTP Used: <b>" + testDataHolder.otpCodeData + "</b>");
+                    "🔑 OTP Used: <b>" + otp + "</b>");
         } else {
             ExtentTestManager.getTest().log(Status.INFO,
-                    "⚠️ No OTP captured for this test.");
+                    "⚠️ No OTP captured for this test");
         }
     }
 
-    private void userPackageInfo(){
-        ExtentTestManager.getTest().log(Status.PASS,
-                "The user's subscription package is: " + testDataHolder.packageTypeData + " With price: " + testDataHolder.packagePriceData);
+    private void logPackageInfo() {
+        TestContext.TestData data = TestContext.getData();
+        String packageType = data.getPackageType();
+        String packagePrice = data.getPackagePrice();
+        
+        if (packageType != null) {
+            ExtentTestManager.getTest().log(Status.INFO,
+                    "📦 Package: " + packageType + " - Price: " + packagePrice);
+        }
     }
 
-    private void logSubscriptionSuccess() {
-        ExtentTestManager.getTest().log(Status.PASS,
-                "🎉 User Subscription completed successfully!");
-    }
+    private void logTestSpecificInfo(ITestResult result, boolean passed) {
+        String methodName = result.getMethod().getMethodName();
+        
+        switch (methodName) {
+            case "openShofhaAndSubscribe":
+            case "openShofha":
+                logPackageInfo();
+                break;
 
-    private void logCancellationSuccess() {
-        ExtentTestManager.getTest().log(Status.PASS,
-                "✅ User Subscription cancelled successfully!");
-    }
+            case "verifyPortalOTP":
+            case "PortalOTPCode":
+            case "otpVerification":
+                if (passed) {
+                    ExtentTestManager.getTest().log(Status.PASS,
+                            "🎉 User Subscription completed successfully!");
+                } else {
+                    ExtentTestManager.getTest().log(Status.FAIL,
+                            "❌ User Subscription failed!");
+                }
+                logPackageInfo();
+                break;
 
-    private void logSubscriptionFailure() {
-        ExtentTestManager.getTest().log(Status.FAIL,
-                "❌ User Subscription failed!");
-    }
+            case "cancelUserSubscription":
+            case "userCancelSubscription":
+                if (passed) {
+                    ExtentTestManager.getTest().log(Status.PASS,
+                            "✅ User Subscription cancelled successfully!");
+                } else {
+                    ExtentTestManager.getTest().log(Status.FAIL,
+                            "⚠️ User Subscription cancellation failed!");
+                }
+                logPackageInfo();
+                break;
 
-    private void logCancellationFailure() {
-        ExtentTestManager.getTest().log(Status.FAIL,
-                "⚠️ User Subscription cancellation failed!");
+            default:
+                // No additional logging needed
+                break;
+        }
     }
-
 }

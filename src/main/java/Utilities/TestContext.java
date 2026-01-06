@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class TestContext {
     private static final Logger logger = LoggerFactory.getLogger(TestContext.class);
-    
+
     // ThreadLocal holder for test data - each thread gets its own instance
     private static final ThreadLocal<TestData> testDataHolder = ThreadLocal.withInitial(() -> {
         logger.debug("Creating new TestData instance for thread: {}", Thread.currentThread().getName());
@@ -37,6 +37,7 @@ public class TestContext {
      * Inner class holding all test data
      */
     public static class TestData {
+
         // Login Info
         private String simtestUsername;
         private String simtestPassword;
@@ -52,6 +53,9 @@ public class TestContext {
         private String packagePrice;
         private String subscriptionTimestamp;
         private String otpCode;
+
+        // Failure Info
+        private String failureReason;
 
         // ============ Getters & Setters ============
 
@@ -135,6 +139,14 @@ public class TestContext {
             this.otpCode = otpCode;
         }
 
+        public String getFailureReason() {
+            return failureReason;
+        }
+
+        public void setFailureReason(String failureReason) {
+            this.failureReason = failureReason;
+        }
+
         @Override
         public String toString() {
             return "TestData{" +
@@ -143,12 +155,8 @@ public class TestContext {
                     ", countryCode='" + countryCode + '\'' +
                     ", packageType='" + packageType + '\'' +
                     ", otpCode='" + otpCode + '\'' +
+                    ", failureReason='" + failureReason + '\'' +
                     '}';
         }
     }
 }
-
-
-
-
-

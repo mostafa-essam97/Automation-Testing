@@ -9,7 +9,6 @@
     <!-- Listeners -->
     <listeners>
         <listener class-name="TestUtilities.TestListener"/>
-        <listener class-name="TestUtilities.HtmlReportListener"/>
         <listener class-name="TestUtilities.RetryTransformer"/>
     </listeners>
 
